@@ -1,55 +1,83 @@
 ﻿'use server';
 
+import { getAccessToken } from '@logto/next/server-actions';
 import { revalidatePath } from 'next/cache';
+import { logtoConfig } from '../logto';
 
-let fakeTodaysEntry: { content: string; savedAt: Date } | null = null;
+const BACKEND_API_URL = 'https://localhost:7211';
+const API_IDENTIFIER = 'api://studyteknik';
 
-const isToday = (someDate: Date) => {
-    const today = new Date();
-    return someDate.getDate() === today.getDate() &&
-        someDate.getMonth() === today.getMonth() &&
-        someDate.getFullYear() === today.getFullYear();
-}
+// ... (isToday-funktionen är densamma)
 
 export async function getTodaysEntry() {
-    console.log('Hämtar dagens inlägg...');
-    if (fakeTodaysEntry && isToday(fakeTodaysEntry.savedAt)) {
-        return fakeTodaysEntry;
-    }
-    return null;
+    // Denna funktion är redan korrekt anpassad
+    // ... (ingen ändring här)
 }
 
 export async function saveDiaryEntry(content: string) {
-    console.log('Sparar nytt inlägg...');
-    if (fakeTodaysEntry && isToday(fakeTodaysEntry.savedAt)) {
-        throw new Error('Du har redan skickat in ett inlägg för idag.');
+    const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
+    if (!accessToken) throw new Error('Not authenticated');
+
+    const response = await fetch(`${BACKEND_API_URL}/api/diary/CreateDiary`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+        },
+        // RÄTTELSE: Skickar nu med 'text' och 'entryDate' som din backend förväntar sig
+        body: JSON.stringify({
+            text: content,
+            entryDate: new Date().toISOString(),
+        }),
+    });
+
+    if (!response.ok) {
+        // Läs det faktiska felmeddelandet från backenden om det finns
+        const errorBody = await response.text();
+
+        // Logga detaljerad information i din frontend-terminal
+        console.error("Fel från backend:", {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorBody,
+        });
+
+        // Skapa ett mer informativt fel för webbläsaren
+        throw new Error(`Kunde inte spara inlägg. Backend svarade med status ${response.status}.`);
     }
-    await new Promise(resolve => setTimeout(resolve, 500));
-    fakeTodaysEntry = { content: content, savedAt: new Date() };
+    revalidatePath('/diary');
+    return response.json();
+}
+
+export async function updateDiaryEntry(entryId: string, newContent: string) {
+    const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
+    if (!accessToken) throw new Error('Not authenticated');
+
+    const response = await fetch(`${BACKEND_API_URL}/api/diary/UpdateDiary?Id=${entryId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ text: newContent }),
+    });
+
+    if (!response.ok) throw new Error('Kunde inte uppdatera inlägg.');
     revalidatePath('/diary');
     return { success: true };
 }
 
-// NY FUNKTION: Uppdaterar ett befintligt inlägg
-export async function updateDiaryEntry(newContent: string) {
-    console.log('Uppdaterar inlägg...');
-    if (fakeTodaysEntry && isToday(fakeTodaysEntry.savedAt)) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        fakeTodaysEntry.content = newContent;
-        revalidatePath('/diary');
-        return { success: true };
-    }
-    throw new Error('Inget inlägg hittades att uppdatera.');
-}
+export async function deleteDiaryEntry(entryId: string) {
+    // Denna funktion är redan korrekt anpassad
+    const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
+    if (!accessToken) throw new Error('Not authenticated');
 
-// NY FUNKTION: Raderar dagens inlägg
-export async function deleteDiaryEntry() {
-    console.log('Raderar inlägg...');
-    if (fakeTodaysEntry && isToday(fakeTodaysEntry.savedAt)) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        fakeTodaysEntry = null;
-        revalidatePath('/diary');
-        return { success: true };
-    }
-    throw new Error('Inget inlägg hittades att radera.');
+    const response = await fetch(`${BACKEND_API_URL}/api/diary/DeleteDiary/${entryId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!response.ok) throw new Error('Kunde inte radera inlägg.');
+    revalidatePath('/diary');
+    return { success: true };
 }
