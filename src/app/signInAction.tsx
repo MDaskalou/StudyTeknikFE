@@ -8,10 +8,9 @@ export default function SignIn({ signInAction }: Props) {
     return (
         <button
             onClick={() => signInAction()}
-            // Ändringar: Större text, mer padding, och ny fokus-stil
             className="bg-[#6139F6] text-white font-bold
-                 text-2xl          /* Ännu större text */
-                 py-5 px-12        /* Mer padding för en större knapp */
+                 text-2xl          /
+                 py-5 px-12
                  rounded-full
                  shadow-lg
                  hover:bg-[#532ddb]

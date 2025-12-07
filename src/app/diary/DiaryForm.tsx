@@ -1,11 +1,12 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { saveDiaryEntry } from './actions';
+import { saveDiaryEntry, rewriteWithAI } from './actions';
 
 export default function DiaryForm() {
     const [content, setContent] = useState('');
     const [status, setStatus] = useState('');
+    const [isAiLoading, setIsAiLoading] = useState(false);
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -13,14 +14,25 @@ export default function DiaryForm() {
 
         try {
             await saveDiaryEntry(content);
-            // Vi behöver inte sätta ett statusmeddelande här, eftersom sidan kommer laddas om.
         } catch (error) {
-            // Om något går fel (t.ex. man försöker spara igen)
             const err = error as Error;
             setStatus(err.message);
             console.error(error);
         }
     };
+
+    const handleRewriteClick = async () => {
+        setIsAiLoading(true);
+        setStatus('');
+        try{
+            const rewrittenText = await rewriteWithAI(content);
+            setContent(rewrittenText);
+        } catch(error)
+        {
+            const err = error as Error;
+            setStatus(`AI-fel: ${err.message}`);
+        }
+    }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -31,14 +43,28 @@ export default function DiaryForm() {
                 className="w-full h-48 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6139F6] focus:border-transparent transition"
                 required
             />
-            <div className="flex items-center gap-4">
-                <button
-                    type="submit"
-                    className="bg-[#6139F6] text-white font-bold py-2 px-6 rounded-lg hover:bg-[#532ddb] transition disabled:bg-gray-400"
-                    disabled={!content || status === 'Sparar...'}
-                >
-                    Spara inlägg
-                </button>
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <button
+                        type="submit"
+                        className="bg-[#6139F6] text-white font-bold py-2 px-6 rounded-lg hover:bg-[#532ddb] transition disabled:bg-gray-400"
+                        disabled={!content || status === 'Sparar...'}
+                    >
+                        Spara inlägg
+                    </button>
+                    {status && <p className="text-red-500">{status}</p>}
+
+                    {content.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={handleRewriteClick}
+                            disabled={isAiLoading}
+                            className="bg-sky-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-sky-600 transition disabled:bg-gray-400"
+                            >
+                            {isAiLoading ? 'Tänker...' : 'Renskriv med AI ✨'}
+                        </button>
+                    )}
+                </div>
                 {status && <p className="text-red-500">{status}</p>}
             </div>
         </form>

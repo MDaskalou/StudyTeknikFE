@@ -24,6 +24,16 @@ export default async function Navbar() {
                                 Studiedagbok
                             </Link>
                         )}
+                        {isAuthenticated && (
+                        <Link href="/decks" className="hover:text-gray-300">
+                            FlashCards
+                        </Link>
+                        )}
+                        {isAuthenticated && (
+                        <Link href="/pomodoro" className="hover:text-gray-300">
+                            Fokus-Timer
+                        </Link>
+                        )}
                     </div>
 
                     {/* Höger sida: Inloggningsstatus */}
