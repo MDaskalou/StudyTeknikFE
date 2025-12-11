@@ -17,7 +17,7 @@ type FlashCardDto = {
 
 // Typen för de lösta propsen
 type DeckDetailsPageProps = {
-    params: { deckId: string }
+    params: Promise<{ deckId: string }>
 };
 // --- SLUT PÅ TYPER ---
 
@@ -32,7 +32,7 @@ async function getFlashCards(deckId: string): Promise<FlashCardDto[]> {
         try {
             const errorBody = await response.json();
             throw new Error(errorBody.error || `Kunde inte hämta kort (status ${response.status})`);
-        } catch(e) {
+        } catch (e) {
             throw new Error(`Kunde inte hämta kort (status ${response.status})`);
         }
     }
@@ -44,10 +44,10 @@ async function getFlashCards(deckId: string): Promise<FlashCardDto[]> {
 //  Huvudkomponenten
 // ========================================================================
 export default async function DeckDetailsPage(
-    propsPromise: Promise<DeckDetailsPageProps>
+    props: DeckDetailsPageProps
 ) {
 
-    const { params } = await propsPromise;
+    const params = await props.params;
 
     const { deckId } = params;
 
@@ -65,10 +65,10 @@ export default async function DeckDetailsPage(
     const hasCards = !fetchError && flashCards && flashCards.length > 0;
 
     return (
-        <main className="max-w-4xl mx-auto p-8 text-white">
+        <main className="max-w-4xl mx-auto p-8">
 
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Kortlek (ID: {deckId})</h1>
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Kortlek (ID: {deckId})</h1>
 
                 {/* Träna-knapp - visas bara om det finns kort */}
                 {hasCards && (
@@ -83,7 +83,7 @@ export default async function DeckDetailsPage(
 
             {/* DIN BEFINTLIGA SEKTION FÖR ATT SKAPA KORT MANUELLT */}
             <section className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">Lägg till nytt kort</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900 dark:text-white">Lägg till nytt kort</h2>
                 <CreateFlashcardForm deckId={deckId} />
             </section>
 
@@ -91,16 +91,16 @@ export default async function DeckDetailsPage(
             {/* STEG 2: LÄGG TILL DIN NYA UPLOAD-SEKTION HÄR           */}
             {/* ====================================================== */}
             <section className="mb-8">
-                <h2 className="text-2xl font-semibold mb-4">...eller Skapa från Fil (AI)</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900 dark:text-white">...eller Skapa från Fil (AI)</h2>
                 <UploadForm deckId={deckId} />
             </section>
 
 
-            <hr className="my-8 border-slate-700" />
+            <hr className="my-8 border-slate-200 dark:border-slate-700" />
 
             {/* DIN BEFINTLIGA SEKTION FÖR ATT VISA KORTEN */}
             <section>
-                <h2 className="text-2xl font-semibold mb-4">Befintliga kort i denna lek</h2>
+                <h2 className="text-2xl font-semibold mb-4 text-slate-900 dark:text-white">Befintliga kort i denna lek</h2>
 
                 {fetchError && (
                     <div role="alert" className="p-4 mb-4 rounded border-s-4 border-red-500 bg-red-800 text-red-100">
@@ -122,8 +122,8 @@ export default async function DeckDetailsPage(
                 ) : (
                     !fetchError && (
                         <div className="text-center py-12">
-                            <p className="text-slate-400 mb-4">Det finns inga kort i denna lek än.</p>
-                            <p className="text-slate-500 text-sm">Lägg till kort ovan (manuellt eller med AI) för att börja träna! 👆</p>
+                            <p className="text-slate-500 dark:text-slate-400 mb-4">Det finns inga kort i denna lek än.</p>
+                            <p className="text-slate-600 dark:text-slate-500 text-sm">Lägg till kort ovan (manuellt eller med AI) för att börja träna! 👆</p>
                         </div>
                     )
                 )}

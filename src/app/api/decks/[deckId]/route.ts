@@ -10,9 +10,9 @@ const API_IDENTIFIER = 'api://studyteknik';
 
 // Typ för contexten
 type RouteContext = {
-    params: {
+    params: Promise<{
         deckId: string;
-    }
+    }>
 };
 
 // ========================================================================
@@ -24,8 +24,7 @@ export async function PUT(
 ) {
     try {
         const { params } = context;
-        await params; // Next 15-fix
-        const { deckId } = params;
+        const { deckId } = await params;
 
         const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
         if (!accessToken) {
@@ -55,7 +54,7 @@ export async function PUT(
             const errorText = await response.text();
             return NextResponse.json({ error: `Backend-fel: ${errorText}` }, { status: response.status });
         }
-    } catch(error) {
+    } catch (error) {
         console.error("KRASCH I /api/decks/[deckId] PUT:", error);
         return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
@@ -70,8 +69,7 @@ export async function DELETE(
 ) {
     try {
         const { params } = context;
-        await params; // Next 15-fix
-        const { deckId } = params;
+        const { deckId } = await params;
 
         const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
         if (!accessToken) {
@@ -102,7 +100,7 @@ export async function DELETE(
     }
 }
 
-// 
+//
 // GET-funktionen (för alla kortlekar) är BORTTAGEN HÄRIFRÅN.
 // Den ligger nu i /src/app/decks/api/route.ts
 //

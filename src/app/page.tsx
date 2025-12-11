@@ -12,8 +12,8 @@ export default async function Home() {
             {isAuthenticated ? (
                 // Innehåll för när användaren ÄR inloggad
                 <div>
-                    <h1 className="text-5xl font-bold">Välkommen tillbaka!</h1>
-                    <p className="text-lg text-slate-400 mt-4">
+                    <h1 className="text-5xl font-bold text-slate-900 dark:text-white">Välkommen tillbaka!</h1>
+                    <p className="text-lg text-slate-600 dark:text-slate-400 mt-4">
                         Välj Studiedagbok i menyn för att fortsätta.
                     </p>
                 </div>
