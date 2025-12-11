@@ -111,44 +111,44 @@ export default function PomodoroPage() {
     // FAS 1: SETUP-FORMULÄRET
     if (phase === 'setup') {
         return (
-            <main className="max-w-xl mx-auto p-8 text-white">
-                <h1 className="text-3xl font-bold mb-6">Starta en ny studiesession</h1>
-                <form onSubmit={handleStartSession} className="space-y-6 bg-slate-800 p-8 rounded-lg">
+            <main className="max-w-xl mx-auto p-8">
+                <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white">Starta en ny studiesession</h1>
+                <form onSubmit={handleStartSession} className="space-y-6 bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md border border-slate-200 dark:border-slate-700">
                     <div>
-                        <label htmlFor="subject" className="block text-sm font-medium text-slate-300">Vilket ämne?</label>
+                        <label htmlFor="subject" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Vilket ämne?</label>
                         <input
                             type="text" id="subject"
                             value={subject} onChange={(e) => setSubject(e.target.value)}
-                            className="mt-1 w-full rounded-md border-slate-600 bg-slate-900 p-3 text-white"
+                            className="mt-1 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 text-slate-900 dark:text-white"
                             placeholder="T.ex. Religionkunskap"
                         />
                     </div>
                     <div>
-                        <label htmlFor="task" className="block text-sm font-medium text-slate-300">Vad ska du plugga?</label>
+                        <label htmlFor="task" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Vad ska du plugga?</label>
                         <input
                             type="text" id="task"
                             value={task} onChange={(e) => setTask(e.target.value)}
-                            className="mt-1 w-full rounded-md border-slate-600 bg-slate-900 p-3 text-white"
+                            className="mt-1 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 text-slate-900 dark:text-white"
                             placeholder="T.ex. Läsa kapitel 4 eller öva på glosor"
                             required
                         />
                     </div>
                     <div>
-                        <label htmlFor="workTime" className="block text-sm font-medium text-slate-300">Hur lång studiesession (minuter)?</label>
+                        <label htmlFor="workTime" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Hur lång studiesession (minuter)?</label>
                         <input
                             type="number" id="workTime"
                             value={workTime} onChange={(e) => setWorkTime(Number(e.target.value))}
-                            className="mt-1 w-full rounded-md border-slate-600 bg-slate-900 p-3 text-white"
+                            className="mt-1 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 text-slate-900 dark:text-white"
                             min="1"
                             required
                         />
                     </div>
                     <div>
-                        <label htmlFor="breakTime" className="block text-sm font-medium text-slate-300">Hur lång paus (minuter)?</label>
+                        <label htmlFor="breakTime" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Hur lång paus (minuter)?</label>
                         <input
                             type="number" id="breakTime"
                             value={breakTime} onChange={(e) => setBreakTime(Number(e.target.value))}
-                            className="mt-1 w-full rounded-md border-slate-600 bg-slate-900 p-3 text-white"
+                            className="mt-1 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 text-slate-900 dark:text-white"
                             min="1"
                             required
                         />
@@ -165,8 +165,8 @@ export default function PomodoroPage() {
     if (phase === 'timing' || phase === 'break') {
         const isWork = phase === 'timing';
         return (
-            <main className="max-w-xl mx-auto p-8 text-white text-center">
-                <div className={`p-12 rounded-lg ${isWork ? 'bg-slate-800' : 'bg-green-800'}`}>
+            <main className="max-w-xl mx-auto p-8 text-center text-slate-900 dark:text-white">
+                <div className={`p-12 rounded-lg ${isWork ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-lg' : 'bg-green-100 dark:bg-green-800 border border-green-200 dark:border-green-700'}`}>
                     <p className="text-lg font-medium">{isWork ? `Fokus: ${task}` : 'Ta en paus!'}</p>
                     <h1 className="text-8xl font-bold my-4">{formatTime(timeLeft)}</h1>
                     <button
@@ -183,7 +183,7 @@ export default function PomodoroPage() {
                             setIsRunning(false);
                         }
                     }}
-                    className="mt-6 text-slate-400 hover:text-red-500"
+                    className="mt-6 text-slate-500 hover:text-red-500 dark:text-slate-400"
                 >
                     Avbryt session
                 </button>
@@ -194,14 +194,14 @@ export default function PomodoroPage() {
     // FAS 3: REFLEKTION
     if (phase === 'reflection') {
         return (
-            <main className="max-w-xl mx-auto p-8 text-white">
-                <h1 className="text-3xl font-bold mb-6">Sessionen är klar!</h1>
-                <form onSubmit={handleReflectionSubmit} className="space-y-6 bg-slate-800 p-8 rounded-lg">
-                    <p>Du fokuserade på: <span className="font-bold">{task}</span></p>
+            <main className="max-w-xl mx-auto p-8">
+                <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white">Sessionen är klar!</h1>
+                <form onSubmit={handleReflectionSubmit} className="space-y-6 bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md border border-slate-200 dark:border-slate-700">
+                    <p className="text-slate-900 dark:text-white">Du fokuserade på: <span className="font-bold">{task}</span></p>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-300">Hur kändes studiesessionen ({workTime} min)?</label>
-                        <select name="time-feedback" className="mt-1 w-full rounded-md border-slate-600 bg-slate-900 p-3 text-white">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Hur kändes studiesessionen ({workTime} min)?</label>
+                        <select name="time-feedback" className="mt-1 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 text-slate-900 dark:text-white">
                             <option value="good">Perfekt</option>
                             <option value="too_long">För lång</option>
                             <option value="too_short">För kort</option>
@@ -209,8 +209,8 @@ export default function PomodoroPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-300">Hur kändes pausen ({breakTime} min)?</label>
-                        <select name="break-feedback" className="mt-1 w-full rounded-md border-slate-600 bg-slate-900 p-3 text-white">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Hur kändes pausen ({breakTime} min)?</label>
+                        <select name="break-feedback" className="mt-1 w-full rounded-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 p-3 text-slate-900 dark:text-white">
                             <option value="good">Perfekt</option>
                             <option value="too_long">För lång</option>
                             <option value="too_short">För kort</option>

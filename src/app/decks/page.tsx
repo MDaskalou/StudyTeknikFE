@@ -1,5 +1,5 @@
 ﻿// Fil: src/app/decks/page.tsx
-import { headers } from 'next/headers'; 
+import { headers } from 'next/headers';
 import { getLogtoContext } from '@logto/next/server-actions';
 import CreateDeckForm from './CreateDeckForm';
 import { redirect } from "next/navigation";
@@ -30,7 +30,7 @@ export default async function DecksPage() {
 
 
     try {
-      
+
         const allHeaders = await headers();
         const cookieHeader = allHeaders.get('cookie') || '';
 
@@ -64,7 +64,7 @@ export default async function DecksPage() {
 
 
     return (
-        <main className="container mx-auto p-4 md:p-8 text-white">
+        <main className="container mx-auto p-4 md:p-8">
             <h1 className="text-2xl md:text-3xl font-bold mb-6">Mina Kortlekar</h1>
             <section className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">Skapa ny Kortlek</h2>
@@ -74,7 +74,7 @@ export default async function DecksPage() {
             <hr className="my-8 border-gray-700" />
 
             <section>
-                <h2 className="text-xl font-semibold mb-4 text-white">Befintliga Kortlekar</h2>
+                <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">Befintliga Kortlekar</h2>
 
                 {fetchError && (
                     <div role="alert" className="rounded border-s-4 border-red-500 bg-red-800 p-4 mb-4">
@@ -89,29 +89,29 @@ export default async function DecksPage() {
                         {decks.map((deck) => (
                             <li
                                 key={deck.id}
-                                className="flex flex-col justify-between p-4 border border-slate-700 rounded-lg shadow-md bg-slate-900"
+                                className="flex flex-col justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg shadow-md bg-white dark:bg-slate-900"
                             >
-                                <Link href={`/decks/${deck.id}`} className="block hover:bg-slate-800 p-2 -m-2 rounded-md transition-colors">
-                                    <h3 className="font-semibold text-xl text-white">{deck.title}</h3>
+                                <Link href={`/decks/${deck.id}`} className="block hover:bg-slate-50 dark:hover:bg-slate-800 p-2 -m-2 rounded-md transition-colors">
+                                    <h3 className="font-semibold text-xl text-slate-900 dark:text-white">{deck.title}</h3>
 
                                     {(deck.courseName || deck.subjectName) && (
-                                        <p className="text-sm text-gray-300 mt-1">
+                                        <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                                             {deck.courseName}{deck.courseName && deck.subjectName ? ' - ' : ''}{deck.subjectName}
                                         </p>
                                     )}
-                                    <p className="text-xs text-gray-400 mt-2">
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
                                         Skapad: {new Date(deck.createdAtUtc).toLocaleDateString('sv-SE', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                    })}
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                        })}
                                     </p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        Antal kort: <span className="font-medium">{deck.cardCount}</span>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        Antal kort: <span className="font-medium text-slate-700 dark:text-slate-200">{deck.cardCount}</span>
                                     </p>
                                 </Link>
 
-                                <div className="mt-4 flex justify-end space-x-2 border-t border-slate-700 pt-4">
+                                <div className="mt-4 flex justify-end space-x-2 border-t border-slate-200 dark:border-slate-700 pt-4">
                                     <DeckListItemActions deck={deck} />
                                     <DeleteDeckButton deckId={deck.id} />
                                 </div>

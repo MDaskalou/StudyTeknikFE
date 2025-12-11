@@ -14,10 +14,10 @@ type FetchOptions = RequestInit & { agent?: https.Agent };
 //  FIX 1: RÄTTA STAVNINGEN PÅ 'flashcardId' (litet c)
 // ========================================================================
 type PutContext = {
-    params: {
+    params: Promise<{
         deckId: string;
-        flashcardId: string; // <-- SKA VARA LITET 'c'
-    }
+        flashcardId: string;
+    }>
 };
 
 /**
@@ -35,10 +35,7 @@ export async function PUT(
         const { params } = context;
 
         // 2. 'await' params-objektet INNAN du använder det
-        await params;
-
-        // 3. Nu kan du säkert komma åt params (med RÄTT stavning)
-        const { deckId, flashcardId } = params; // <-- SKA VARA LITET 'c'
+        const { deckId, flashcardId } = await params;
 
         // 4. Felsäkringen (denna ska nu INTE köras)
         if (!flashcardId || flashcardId === 'undefined') {

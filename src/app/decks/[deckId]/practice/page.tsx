@@ -1,7 +1,7 @@
 ﻿// Fil: src/app/decks/[deckId]/practice/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 
 type FlashCardDto = {
@@ -11,12 +11,12 @@ type FlashCardDto = {
 };
 
 type PracticePageProps = {
-    params: { deckId: string }
+    params: Promise<{ deckId: string }>
 };
 
 export default function PracticePage({ params }: PracticePageProps) {
     const router = useRouter();
-    const { deckId } = params;
+    const { deckId } = use(params);
 
     const [cards, setCards] = useState<FlashCardDto[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -168,9 +168,8 @@ export default function PracticePage({ params }: PracticePageProps) {
                 onClick={handleFlip}
             >
                 <div
-                    className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${
-                        isFlipped ? 'rotate-y-180' : ''
-                    }`}
+                    className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''
+                        }`}
                     style={{
                         transformStyle: 'preserve-3d',
                         transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'

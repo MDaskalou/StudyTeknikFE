@@ -5,7 +5,7 @@ import { logtoConfig } from '@/app/logto';
 
 // Vi stänger av ESLint-regeln för nästa rad eftersom bibliotekets typer spökar
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const logtoHandler = (handleAuthRoutes as any)(logtoConfig);
+const logtoHandler = new (handleAuthRoutes as any)(logtoConfig);
 
 type RouteProps = {
     params: Promise<{ action: string }>;
