@@ -79,4 +79,4 @@ Here is an overview of key API calls the frontend makes to the backend. See the 
 1. **Self-Signed Certificates**: 
    - Since the backend runs locally with a self-signed certificate (https), calls from Node.js (Server Components) might fail unless SSL verification is disabled. This is handled in the `package.json` `dev` script, but might occur if running `npm start` or in other environments without corresponding configuration.
 2. **Authentication (401/403)**:
-   - If you receive "Unauthorized" or "Forbidden", check that your Logto user has the correct **Role** assigned and that `src/app/logto.ts` requests the correct scopes and resources (`api://studyteknik`).
+   - If you receive "Unauthorized" or "Forbidden", check that your Logto user has the correct **Role** assigned and that `src/app/logto.ts` requests the correct scopes and resources (`api://studyteknik`)...

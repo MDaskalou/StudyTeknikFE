@@ -1,13 +1,13 @@
-// Fil: src/app/api/ai/generate-cards/route.ts
+﻿// Fil: src/app/api/ai/generate-cards/route.ts
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { getAccessToken } from '@logto/next/server-actions';
-import { logtoConfig } from '@/app/logto';
+import { logtoConfig } from '@/app/logto'; // Se till att sökvägen stämmer
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:44317';
 const API_IDENTIFIER = 'api://studyteknik';
 
-// Denna funktion tar emot JSON från klienten och skickar vidare till C#
+// Denna funktion strömmar FormData från Next.js till C#
 export async function POST(request: NextRequest) {
     try {
         // 1. Hämta token
@@ -16,34 +16,30 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        // 2. Hämta JSON från klienten
-        const body = await request.json();
-
-        // Validera att vi har rätt fält
-        if (!body.pdfContent || !body.deckId) {
-            return NextResponse.json({ error: 'Missing required fields: pdfContent, deckId' }, { status: 400 });
-        }
+        // 2. Hämta FormData från klienten
+        const formData = await request.formData();
 
         // 3. Bygg anropet till C#-backend
-        // Endpoint enligt krav: POST /api/ai/generate-cards
-        const backendResponse = await fetch(`${BACKEND_API_URL}/api/ai/generate-cards`, {
+        // Denna URL matchar din nya C# AIController
+        const backendResponse = await fetch(`${BACKEND_API_URL}/api/ai/generate-cards-from-file`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                // Skicka INTE 'Content-Type', 'fetch' sätter rätt 'multipart/form-data'
+                // gräns (boundary) automatiskt när body är FormData.
                 'Authorization': `Bearer ${accessToken}`,
             },
-            body: JSON.stringify(body),
-            // 'agent' behövs inte för fetch i Next.js server context om NODE_TLS_REJECT_UNAUTHORIZED=0 är satt globalt
+            body: formData,
+            // 'agent' behövs inte, 'NODE_TLS_REJECT_UNAUTHORIZED=0' löser detta
         });
 
         // 4. Hantera svar från C#
         if (!backendResponse.ok) {
             const errorText = await backendResponse.text();
-            console.error("Fel från C# AI backend (Text):", errorText);
+            console.error("Fel från C# AI backend:", errorText);
             try {
                 const errorJson = JSON.parse(errorText);
                 return NextResponse.json({ error: errorJson.description || "Fel från backend" }, { status: backendResponse.status });
-            } catch (e) {
+            } catch(e) {
                 return NextResponse.json({ error: errorText }, { status: backendResponse.status });
             }
         }

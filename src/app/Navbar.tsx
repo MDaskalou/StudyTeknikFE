@@ -35,6 +35,12 @@ export default async function Navbar() {
                                 Fokus-Timer
                             </Link>
                         )}
+                        {isAuthenticated && (
+                            <Link href="/study-sessions" className="text-slate-700 dark:text-white hover:text-slate-900 dark:hover:text-slate-300 transition-colors">
+                                Studie-sessioner
+                            </Link>
+                        )}
+
                     </div>
 
                     {/* Höger sida: Inloggningsstatus */}

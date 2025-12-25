@@ -4,7 +4,7 @@ import { OperationResult } from '@/types/api';
 
 export const getMyProfile = async (token: string): Promise<StudentGeneralDto | null> => {
     try {
-        const url = `${API_BASE_URL}/students/student/general`;
+        const url = `${API_BASE_URL}/profile/Get-My-Profile`;
         console.log('Fetching profile from:', url);
         const res = await fetch(url, {
             method: 'GET',
