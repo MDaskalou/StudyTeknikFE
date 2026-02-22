@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         };
 
         // Anropa din BACKEND
-        const response = await fetch(`${BACKEND_API_URL}/api/diary/GetAllDiariesForStudent`, options); // Bytte till din action-URL
+        const response = await fetch(`${BACKEND_API_URL}/api/diary/GetAllDiariesForStudent`, options);
 
         if (!response.ok) {
             console.error("Fel vid hämtning av dagboksinlägg (API Route):", await response.text());
