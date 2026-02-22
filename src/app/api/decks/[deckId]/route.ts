@@ -10,10 +10,58 @@ const API_IDENTIFIER = 'api://studyteknik';
 
 // Typ för contexten
 type RouteContext = {
-    params: {
+    params: Promise<{
         deckId: string;
-    }
+    }>
 };
+
+// ========================================================================
+//  GET-funktionen (för att hämta EN specifik kortlek)
+// ========================================================================
+export async function GET(
+    request: NextRequest,
+    context: RouteContext
+) {
+    try {
+        const { params } = context;
+        const { deckId } = await params;
+
+        const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
+        if (!accessToken) {
+            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+        }
+
+        // URL till din C#-backend
+        // Vi testar standard REST-mönster igen nu när GET-handlern finns i Next.js
+        const backendApiUrl = `${BACKEND_API_URL}/api/decks/${deckId}`;
+
+        const response = await fetch(backendApiUrl, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            // 'agent' behövs inte om du kör med NODE_TLS_REJECT_UNAUTHORIZED=0 i dev
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return NextResponse.json(data);
+        } else {
+            // Om backend svarar med fel (t.ex. 404), skicka vidare det
+            const errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                return NextResponse.json({ error: errorJson.description || "Fel från backend" }, { status: response.status });
+            } catch (e) {
+                return NextResponse.json({ error: errorText }, { status: response.status });
+            }
+        }
+
+    } catch (error) {
+        console.error("KRASCH I /api/decks/[deckId] GET:", error);
+        return NextResponse.json({ error: (error as Error).message }, { status: 500 });
+    }
+}
 
 // ========================================================================
 //  PUT-funktionen (för att redigera en kortlek)
@@ -24,8 +72,7 @@ export async function PUT(
 ) {
     try {
         const { params } = context;
-        await params; // Next 15-fix
-        const { deckId } = params;
+        const { deckId } = await params;
 
         const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
         if (!accessToken) {
@@ -55,7 +102,7 @@ export async function PUT(
             const errorText = await response.text();
             return NextResponse.json({ error: `Backend-fel: ${errorText}` }, { status: response.status });
         }
-    } catch(error) {
+    } catch (error) {
         console.error("KRASCH I /api/decks/[deckId] PUT:", error);
         return NextResponse.json({ error: (error as Error).message }, { status: 500 });
     }
@@ -70,8 +117,7 @@ export async function DELETE(
 ) {
     try {
         const { params } = context;
-        await params; // Next 15-fix
-        const { deckId } = params;
+        const { deckId } = await params;
 
         const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
         if (!accessToken) {
@@ -102,7 +148,7 @@ export async function DELETE(
     }
 }
 
-// 
+//
 // GET-funktionen (för alla kortlekar) är BORTTAGEN HÄRIFRÅN.
 // Den ligger nu i /src/app/decks/api/route.ts
 //

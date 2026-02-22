@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 
+import { deleteDiaryEntry } from './actions';
+import { Trash2, Eye, X } from 'lucide-react'; // Förutsatt att du har lucide-react installerat (hade det i implementation plan checken)
+
 type Entry = {
     id: string;
     textSnippet: string;
@@ -26,6 +29,25 @@ export default function DiaryHistoric({ entries }: { entries: Entry[] }) {
     const [openMonthKey, setOpenMonthKey] = useState<string | null>(null);
     // State för öppen vecka
     const [openWeekKey, setOpenWeekKey] = useState<string | null>(null);
+
+    // State för att visa hela texten
+    const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
+    const [isDeleting, setIsDeleting] = useState<string | null>(null); // ID på inlägg som raderas
+
+    const handleDelete = async (entryId: string) => {
+        if (window.confirm('Är du säker på att du vill radera detta inlägg? Det går inte att ångra.')) {
+            setIsDeleting(entryId);
+            try {
+                await deleteDiaryEntry(entryId);
+                // Notera: Komponenten kommer att reras automatiskt om server action gör revalidatePath
+            } catch (error) {
+                console.error("Kunde inte radera:", error);
+                alert("Kunde inte radera inlägget. Försök igen.");
+            } finally {
+                setIsDeleting(null);
+            }
+        }
+    };
 
     if (entries.length === 0) {
         return <p className="text-gray-500">Du har inga tidigare inlägg än.</p>;
@@ -94,11 +116,33 @@ export default function DiaryHistoric({ entries }: { entries: Entry[] }) {
                                             {isWeekExpanded && (
                                                 <div className="space-y-4 p-4">
                                                     {groupedData[monthKey][weekKey].map(entry => (
-                                                        <div key={entry.id} className="border-l-2 border-slate-500 pl-4">
-                                                            <p className="font-semibold text-slate-300">
-                                                                {new Date(entry.entryDate).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric' })}
-                                                            </p>
-                                                            <p className="text-slate-400 whitespace-pre-wrap">{entry.textSnippet}</p>
+                                                        <div key={entry.id} className="border-l-2 border-slate-500 pl-4 py-2 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 hover:bg-slate-800/50 rounded pr-2 transition-colors">
+                                                            <div className="flex-1">
+                                                                <p className="font-semibold text-slate-300">
+                                                                    {new Date(entry.entryDate).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric' })}
+                                                                </p>
+                                                                <p className="text-slate-400 whitespace-pre-wrap line-clamp-3">
+                                                                    {entry.textSnippet}
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="flex gap-2 shrink-0">
+                                                                <button
+                                                                    onClick={() => setSelectedEntry(entry)}
+                                                                    title="Läs hela"
+                                                                    className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-900/30 rounded-full transition-colors"
+                                                                >
+                                                                    <Eye size={20} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDelete(entry.id)}
+                                                                    disabled={isDeleting === entry.id}
+                                                                    title="Radera"
+                                                                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-900/30 rounded-full transition-colors disabled:opacity-50"
+                                                                >
+                                                                    <Trash2 size={20} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -111,6 +155,42 @@ export default function DiaryHistoric({ entries }: { entries: Entry[] }) {
                     </div>
                 );
             })}
+            {/* MODAL FÖR ATT VISA HELA TEXTEN */}
+            {selectedEntry && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setSelectedEntry(null)}>
+                    <div
+                        className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col border border-slate-200 dark:border-slate-700"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-800">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                {new Date(selectedEntry.entryDate).toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                            </h3>
+                            <button
+                                onClick={() => setSelectedEntry(null)}
+                                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto">
+                            <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-300 text-lg leading-relaxed">
+                                {selectedEntry.textSnippet}
+                            </p>
+                        </div>
+
+                        <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+                            <button
+                                onClick={() => setSelectedEntry(null)}
+                                className="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded hover:bg-slate-300 dark:hover:bg-slate-700 transition"
+                            >
+                                Stäng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

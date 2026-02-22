@@ -1,10 +1,12 @@
-﻿// Fil: src/app/decks/CreateFlashcardForm.tsx
-'use client';
+﻿import { useState, type FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { useState, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation'; // För att uppdatera listan
+interface Props {
+    deckId: string;
+    onCardAdded?: (card: any) => void;
+}
 
-export default function CreateFlashcardForm({ deckId }: { deckId: string }) {
+export default function CreateFlashcardForm({ deckId, onCardAdded }: Props) {
     const router = useRouter();
     const [frontText, setFrontText] = useState('');
     const [backText, setBackText] = useState('');
@@ -23,24 +25,10 @@ export default function CreateFlashcardForm({ deckId }: { deckId: string }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    frontText: frontText, // <-- Matchar din backend
-                    backText: backText,   // <-- Matchar din backend
+                    frontText: frontText,
+                    backText: backText,
                 }),
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Kunde inte skapa kortet.');
-            }
-
-            setStatus({ type: 'success', message: 'Kortet har lagts till!' });
-            setFrontText('');
-            setBackText('');
-
-            router.refresh(); // Uppdatera kortlistan på sidan
-
-        } catch (error) {
-            setStatus({ type: 'error', message: (error as Error).message });
         } finally {
             setIsLoading(false);
         }
@@ -51,9 +39,8 @@ export default function CreateFlashcardForm({ deckId }: { deckId: string }) {
             {/* Meddelande-ruta */}
             {status && (
                 <div
-                    className={`p-3 rounded-md text-sm font-medium ${
-                        status.type === 'success' ? 'bg-green-800 text-green-100' : 'bg-red-800 text-red-100'
-                    }`}
+                    className={`p-3 rounded-md text-sm font-medium ${status.type === 'success' ? 'bg-green-800 text-green-100' : 'bg-red-800 text-red-100'
+                        }`}
                 >
                     {status.message}
                 </div>

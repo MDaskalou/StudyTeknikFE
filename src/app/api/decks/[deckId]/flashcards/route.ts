@@ -13,19 +13,19 @@ type FetchOptions = RequestInit & { agent?: https.Agent };
 
 // Typ för vårt context-löfte (används av båda funktionerna)
 type RouteContext = {
-    params: {
+    params: Promise<{
         deckId: string;
-    }
+    }>
 };
 
 // --- GET-funktion (Hämta alla kort) ---
 export async function GET(
     request: NextRequest,
-    contextPromise: Promise<RouteContext> // Fix för Next 15
+    context: RouteContext
 ) {
     try {
-        const { params } = await contextPromise; // Fix för Next 15
-        const { deckId } = params;
+        const { params } = context;
+        const { deckId } = await params;
 
         const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
         if (!accessToken) {
@@ -71,30 +71,30 @@ export async function GET(
 // ========================================================================
 export async function POST(
     request: NextRequest,
-    contextPromise: Promise<RouteContext> // Fix för Next 15
+    context: RouteContext
 ) {
     try {
-        const {params} = await contextPromise; // Fix för Next 15
-        const {deckId} = params;
+        const { params } = context;
+        const { deckId } = await params;
 
         const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
         if (!accessToken) {
             // Fullständig felhantering
-            return NextResponse.json({error: 'Not authenticated'}, {status: 401});
+            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
         let data;
         try {
             data = await request.json(); // Hantera om bodyn är tom/felaktig
         } catch (jsonError) {
-            return NextResponse.json({error: 'Ogiltig JSON-body'}, {status: 400});
+            return NextResponse.json({ error: 'Ogiltig JSON-body' }, { status: 400 });
         }
 
-        const {frontText, backText} = data;
+        const { frontText, backText } = data;
 
         if (!frontText || !backText) {
             // Fullständig felhantering
-            return NextResponse.json({error: 'Fråga och svar får inte vara tomma'}, {status: 400});
+            return NextResponse.json({ error: 'Fråga och svar får inte vara tomma' }, { status: 400 });
         }
 
         const backendApiUrl = `${API_BASE_URL}/api/decks/${deckId}/flashcards`;
@@ -105,7 +105,7 @@ export async function POST(
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`,
             },
-            body: JSON.stringify({frontText, backText}),
+            body: JSON.stringify({ frontText, backText }),
             agent: unsafeAgent
         };
 
@@ -113,18 +113,18 @@ export async function POST(
 
         if (response.ok) {
             const createdFlashcard = await response.json();
-            return NextResponse.json(createdFlashcard, {status: 201});
+            return NextResponse.json(createdFlashcard, { status: 201 });
         } else {
             // Fullständig felhantering
             const errorText = await response.text();
             console.error(`Fel från backend (${backendApiUrl}):`, errorText);
-            return NextResponse.json({error: `Kunde inte skapa kort: ${errorText}`}, {status: response.status});
+            return NextResponse.json({ error: `Kunde inte skapa kort: ${errorText}` }, { status: response.status });
         }
 
     } catch (error) {
         // Fullständig felhantering
         console.error("KRASCH I /api/decks/[deckId]/flashcards POST:", error);
         const errorMessage = (error instanceof Error) ? error.message : "Internal server error";
-        return NextResponse.json({error: errorMessage}, {status: 500});
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

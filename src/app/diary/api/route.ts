@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     try {
         // Denna kommer nu fungera, eftersom 'request' kommer ha cookies
         const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
-        if(!accessToken) {
+        if (!accessToken) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
@@ -34,9 +34,9 @@ export async function GET(request: NextRequest) {
         };
 
         // Anropa din BACKEND
-        const response = await fetch(`${BACKEND_API_URL}/api/diary/GetAllDiariesForStudent`, options); // Bytte till din action-URL
+        const response = await fetch(`${BACKEND_API_URL}/api/diary/GetAllDiariesForStudent`, options);
 
-        if(!response.ok) {
+        if (!response.ok) {
             console.error("Fel vid hämtning av dagboksinlägg (API Route):", await response.text());
             return NextResponse.json({ error: 'Failed to fetch diaries' }, { status: response.status });
         }
@@ -46,8 +46,8 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(sortedEntries);
 
-    } catch(error) {
+    } catch (error) {
         console.error("KRASCH I /api/diaries GET:", error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal server error', details: error instanceof Error ? error.message : String(error) }, { status: 500 });
     }
 }

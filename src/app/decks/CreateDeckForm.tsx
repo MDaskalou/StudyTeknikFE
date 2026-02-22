@@ -1,7 +1,8 @@
 ﻿'use client'; // Denna komponent MÅSTE vara en Client Component
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createDeckAction } from './actions';
+import { getCoursesAction } from '../study-sessions/actions'; // Återanvänd action från study-sessions
 
 // Separat komponent för Submit-knappen för att hantera 'pending'-state
 function SubmitButton() {
@@ -25,6 +26,27 @@ export default function CreateDeckForm() {
     // Koppla samman Server Action med useFormState
     const [state, formAction] = useActionState(createDeckAction, initialState);
     const formRef = useRef<HTMLFormElement>(null); // Referens till form-elementet för att kunna nollställa
+
+    // State för kurser
+    const [courses, setCourses] = useState<{ id: string; name: string }[]>([]);
+    const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+
+    // Hämta kurser vid mount
+    useEffect(() => {
+        async function fetchCourses() {
+            try {
+                const res = await getCoursesAction();
+                if (res.courses) {
+                    setCourses(res.courses);
+                }
+            } catch (error) {
+                console.error("Kunde inte hämta kurser:", error);
+            } finally {
+                setIsLoadingCourses(false);
+            }
+        }
+        fetchCourses();
+    }, []);
 
     // Effekt som körs när 'state' (resultatet från action) ändras
     useEffect(() => {
@@ -75,15 +97,30 @@ export default function CreateDeckForm() {
             {/* Kursnamn-fält */}
             <div>
                 <label htmlFor="courseName" className="block text-sm font-medium text-gray-300">
-                    Kursnamn (valfritt)
+                    Välj Kurs (valfritt)
                 </label>
-                <input
-                    type="text"
-                    id="courseName"
-                    name="courseName" // Namnet MÅSTE matcha
-                    aria-describedby="courseName-error"
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-transparent text-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-400 focus:ring-opacity-50 sm:text-sm placeholder-gray-500"    />
-                    {state?.errors?.courseName && (
+
+                {isLoadingCourses ? (
+                    <div className="text-gray-500 text-sm">Laddar dina kurser...</div>
+                ) : (
+                    <select
+                        id="courseName"
+                        name="courseName"
+                        aria-describedby="courseName-error"
+                        defaultValue=""
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-slate-800 text-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-400 focus:ring-opacity-50 sm:text-sm"
+                    >
+                        <option value="" disabled>-- Välj en kurs --</option>
+                        {courses.map(course => (
+                            <option key={course.id} value={course.name}>
+                                {course.name}
+                            </option>
+                        ))}
+                        <option value="">(Ingen kurs / Annat)</option>
+                    </select>
+                )}
+
+                {state?.errors?.courseName && (
                     <p id="courseName-error" className="mt-2 text-sm text-red-600" role="alert">
                         {state.errors.courseName.join(', ')}
                     </p>
@@ -92,13 +129,14 @@ export default function CreateDeckForm() {
 
             {/* Ämnesnamn-fält */}
             <div>
-                <label htmlFor="subjectName" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="subjectName" className="block text-sm font-medium text-gray-300">
                     Ämnesnamn (valfritt)
                 </label>
                 <input
                     type="text"
                     id="subjectName"
                     name="subjectName" // Namnet MÅSTE matcha
+                    placeholder="T.ex. Historia eller Kemi"
                     aria-describedby="subjectName-error"
                     className="mt-1 block w-full rounded-md border border-gray-300 bg-transparent text-white shadow-sm focus:border-blue-400 focus:ring focus:ring-blue-400 focus:ring-opacity-50 sm:text-sm placeholder-gray-500"
                 />

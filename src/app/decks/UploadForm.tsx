@@ -13,9 +13,10 @@ type AiCard = {
 // Props (oförändrad)
 type Props = {
     deckId: string;
+    onCardsAdded?: (newCards: any[]) => void;
 };
 
-export default function UploadForm({ deckId }: Props) {
+export default function UploadForm({ deckId, onCardsAdded }: Props) {
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -44,7 +45,7 @@ export default function UploadForm({ deckId }: Props) {
         }
     };
 
-    // Hanterare för dra-och-släpp (dina funktioner är perfekta)
+    // Hanterare för dra-och-släpp
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
@@ -67,9 +68,6 @@ export default function UploadForm({ deckId }: Props) {
         }
     };
 
-    // ========================================================================
-    //  FIX: Din 'handleGenerate'-funktion var tom. Här är den ifyllda koden.
-    // ========================================================================
     const handleGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!file) {
@@ -81,12 +79,12 @@ export default function UploadForm({ deckId }: Props) {
         setSuggestedCards([]);
 
         const formData = new FormData();
-        formData.append('file', file);
+        // Force cast to Blob/any to avoid TS error if types are strict about File | null
+        formData.append('file', file as Blob);
         formData.append('deckId', deckId);
 
         try {
-            // Anropa den interna Next.js-routen
-            const response = await fetch('/api/ai/generate-cards', {
+            const response = await fetch('/api/ai/generate-cards-from-file', {
                 method: 'POST',
                 body: formData,
             });
@@ -109,15 +107,13 @@ export default function UploadForm({ deckId }: Props) {
         }
     };
 
-    // ========================================================================
-    //  FIX: Din 'handleSaveCards'-funktion var tom. Här är den ifyllda koden.
-    // ========================================================================
     const handleSaveCards = async () => {
         setIsLoading(true);
         setError(null);
 
         try {
-            // Loopa igenom och anropa din BEFINTLIGA "skapa kort"-endpoint
+            const newlyCreatedCards: any[] = [];
+
             for (const card of suggestedCards) {
                 const saveResponse = await fetch(`/api/decks/${deckId}/flashcards`, {
                     method: 'POST',
@@ -131,10 +127,27 @@ export default function UploadForm({ deckId }: Props) {
                 if (!saveResponse.ok) {
                     throw new Error(`Kunde inte spara kortet: "${card.frontText}"`);
                 }
+
+                const apiCard = await saveResponse.json();
+                console.log('[UploadForm] Raw API Card:', apiCard); // DEBUG
+
+                const normalizedCard = {
+                    id: apiCard.id || apiCard.Id,
+                    frontText: apiCard.frontText || apiCard.FrontText || card.frontText,
+                    backText: apiCard.backText || apiCard.BackText || card.backText,
+                };
+                console.log('[UploadForm] Normalized Card:', normalizedCard); // DEBUG
+
+                newlyCreatedCards.push(normalizedCard);
             }
 
-            setSuggestedCards([]); // Töm listan
-            router.refresh(); // Ladda om sidans data (så listan "Befintliga kort" uppdateras)
+            setSuggestedCards([]);
+
+            if (onCardsAdded && newlyCreatedCards.length > 0) {
+                onCardsAdded(newlyCreatedCards);
+            }
+
+            router.refresh();
 
         } catch (err) {
             setError((err as Error).message);
@@ -143,10 +156,6 @@ export default function UploadForm({ deckId }: Props) {
         }
     };
 
-
-    // ========================================================================
-    //  Din JSX (med den nya släpp-zonen)
-    // ========================================================================
     return (
         <div className="bg-slate-800 border border-slate-700 p-6 rounded-lg">
             <h3 className="text-lg font-semibold mb-4 text-white">Skapa kort från fil</h3>
@@ -193,9 +202,6 @@ export default function UploadForm({ deckId }: Props) {
 
             {error && <p className="text-red-400 mt-4">{error}</p>}
 
-            {/* ======================================================================== */}
-            {/* FIX: Ditt avsnitt för att visa förslag var tomt. Här är den ifyllda koden. */}
-            {/* ======================================================================== */}
             {suggestedCards.length > 0 && (
                 <div className="mt-6">
                     <h4 className="font-semibold mb-2 text-white">AI-genererade förslag:</h4>

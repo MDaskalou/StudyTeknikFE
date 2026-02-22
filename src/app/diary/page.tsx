@@ -35,7 +35,8 @@ export default async function DiaryPage() {
         // --- UPPDATERAT ANROP ---
 
         // 1. Hämta användarens cookies från inkommande request
-        const cookieHeader = cookies().toString();
+        const cookieStore = await cookies();
+        const cookieHeader = cookieStore.toString();
 
         // 2. Anropa din interna API-rutt (/diary/api)
         // Vi använder 'fetch' här, INTE 'getAllEntries'
