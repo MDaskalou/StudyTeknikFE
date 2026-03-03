@@ -4,9 +4,10 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig } from '@/app/logto'; // Se till att sökvägen stämmer
 import https from 'https';
+import { BACKEND_API_URL } from '@/lib/constants';
+
 // 'Route' importerades men användes inte, så jag tog bort den.
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:44317';
 const API_IDENTIFIER = 'api://studyteknik';
 const unsafeAgent = new https.Agent({ rejectUnauthorized: false });
 type FetchOptions = RequestInit & { agent?: https.Agent };
@@ -34,7 +35,7 @@ export async function GET(
         }
 
         // URL:en till din C#-slutpunkt
-        const backendApiUrl = `${API_BASE_URL}/api/decks/${deckId}/flashcards`;
+        const backendApiUrl = `${BACKEND_API_URL}/api/decks/${deckId}/flashcards`;
 
         const options: FetchOptions = {
             method: 'GET',
@@ -97,7 +98,7 @@ export async function POST(
             return NextResponse.json({ error: 'Fråga och svar får inte vara tomma' }, { status: 400 });
         }
 
-        const backendApiUrl = `${API_BASE_URL}/api/decks/${deckId}/flashcards`;
+        const backendApiUrl = `${BACKEND_API_URL}/api/decks/${deckId}/flashcards`;
 
         const options: FetchOptions = {
             method: 'POST', // Korrekt metod

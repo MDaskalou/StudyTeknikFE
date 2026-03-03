@@ -4,9 +4,9 @@ import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig, API_IDENTIFIER } from '@/app/logto'; // Se till att sökvägen stämmer
 import * as studySessionService from '@/services/studySessionService';
 import { revalidatePath } from 'next/cache';
+import { BACKEND_API_URL } from '@/lib/constants';
 
 // Justera URL:en om din backend kör på en annan port i prod
-const BACKEND_URL = process.env.BACKEND_URL || 'https://localhost:44317';
 
 // --- NY FUNKTION: Hämtar kurser för dropdownen ---
 export async function getCoursesAction() {
@@ -18,7 +18,7 @@ export async function getCoursesAction() {
         }
 
         // 1. Hämta StudentProfil för att få ID
-        const profileRes = await fetch(`${BACKEND_URL}/api/student-profiles/GetAllStudentProfiles`, {
+        const profileRes = await fetch(`${BACKEND_API_URL}/api/student-profiles/GetAllStudentProfiles`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -36,7 +36,7 @@ export async function getCoursesAction() {
         const profileId = profiles[0].id;
 
         // 2. Hämta Kurser baserat på profil-ID
-        const coursesRes = await fetch(`${BACKEND_URL}/api/student-profiles/${profileId}/courses`, {
+        const coursesRes = await fetch(`${BACKEND_API_URL}/api/student-profiles/${profileId}/courses`, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -49,9 +49,9 @@ export async function getCoursesAction() {
 
         return { courses };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Fetch error in getCoursesAction:", error);
-        return { error: error.message || 'Kunde inte ladda data.' };
+        return { error: error instanceof Error ? error.message : 'Kunde inte ladda data.' };
     }
 }
 

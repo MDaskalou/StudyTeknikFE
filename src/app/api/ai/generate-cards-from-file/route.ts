@@ -3,8 +3,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig } from '@/app/logto'; // Se till att sökvägen stämmer
+import { BACKEND_API_URL } from '@/lib/constants';
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:44317';
+
 const API_IDENTIFIER = 'api://studyteknik';
 
 // Denna funktion strömmar FormData från Next.js till C#

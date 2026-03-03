@@ -4,8 +4,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig } from '@/app/logto';
 import https from 'https';
+import { BACKEND_API_URL } from '@/lib/constants';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:44317';
 const API_IDENTIFIER = 'api://studyteknik';
 const unsafeAgent = new https.Agent({ rejectUnauthorized: false });
 type FetchOptions = RequestInit & { agent?: https.Agent };
@@ -55,7 +55,7 @@ export async function PUT(
         }
 
         // 5. Använd rätt stavning i URL:en
-        const backendApiUrl = `${API_BASE_URL}/api/decks/${deckId}/flashcards/${flashcardId}`;
+        const backendApiUrl = `${BACKEND_API_URL}/api/decks/${deckId}/flashcards/${flashcardId}`;
 
         const options: FetchOptions = {
             method: 'PUT',

@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig } from '../logto'; // <-- KONTROLLERA ATT DENNA SÖKVÄG ÄR RÄTT
 import https from 'https';
-import { headers } from 'next/headers';
+import { BACKEND_API_URL } from '@/lib/constants';
+
 
 // --- INTERFACES (Oförändrade) ---
 interface ApiError {
@@ -33,7 +34,6 @@ type DeckUpdateData = {
 };
 
 // --- KONSTANTER (Oförändrade) ---
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:44317';
 const API_IDENTIFIER = 'api://studyteknik';
 const unsafeAgent = new https.Agent({ rejectUnauthorized: false });
 type FetchOptions = RequestInit & { agent?: https.Agent };
@@ -66,7 +66,7 @@ export async function createDeckAction(
             agent: unsafeAgent
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/decks/CreateDeck`, options);
+        const response = await fetch(`${BACKEND_API_URL}/api/decks/CreateDeck`, options);
 
         if (response.ok) {
             const createdDeck: DeckDto = await response.json();
@@ -109,7 +109,7 @@ export async function deleteDeckAction(deckId: string): Promise<{ success: boole
         // Eftersom backend har FK-lås, måste vi ta bort alla kort först.
         try {
             // 1. Hämta alla kort i leken
-            const getCardsUrl = `${API_BASE_URL}/api/decks/${deckId}/flashcards`;
+            const getCardsUrl = `${BACKEND_API_URL}/api/decks/${deckId}/flashcards`;
             const getCardsRes = await fetch(getCardsUrl, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${accessToken}` },
@@ -121,8 +121,8 @@ export async function deleteDeckAction(deckId: string): Promise<{ success: boole
                 const cards = await getCardsRes.json();
                 if (Array.isArray(cards) && cards.length > 0) {
                     // 2. Ta bort alla kort parallellt
-                    await Promise.all(cards.map(async (card: any) => {
-                        await fetch(`${API_BASE_URL}/api/decks/${deckId}/flashcards/${card.id}`, {
+                    await Promise.all(cards.map(async (card: { id: string }) => {
+                        await fetch(`${BACKEND_API_URL}/api/decks/${deckId}/flashcards/${card.id}`, {
                             method: 'DELETE',
                             headers: { 'Authorization': `Bearer ${accessToken}` },
                             agent: unsafeAgent
@@ -145,7 +145,7 @@ export async function deleteDeckAction(deckId: string): Promise<{ success: boole
             agent: unsafeAgent
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/decks/DeleteDeck/${deckId}`, options);
+        const response = await fetch(`${BACKEND_API_URL}/api/decks/DeleteDeck/${deckId}`, options);
 
         if (response.ok || response.status === 204) {
             revalidatePath('/decks');
@@ -192,7 +192,7 @@ export async function getDecksAction(): Promise<{
         };
 
         // Anropa din externa backend för att hämta kortlekar
-        const response = await fetch(`${API_BASE_URL}/api/decks/GetAllDecks`, options);
+        const response = await fetch(`${BACKEND_API_URL}/api/decks/GetAllDecks`, options);
 
         if (response.ok) {
             const decks: DeckDto[] = await response.json();
@@ -239,7 +239,7 @@ export async function updateDeckAction(
 
         // 3. Anropa C# backend DIREKT
         // (Baserat på din C#-controller: [HttpPut("UpdateDeck/{Id}")])
-        const response = await fetch(`${API_BASE_URL}/api/decks/UpdateDeck/${deckId}`, options);
+        const response = await fetch(`${BACKEND_API_URL}/api/decks/UpdateDeck/${deckId}`, options);
 
         // 4. Hantera svar (precis som din deleteDeckAction)
         if (response.ok || response.status === 204) {
@@ -269,11 +269,11 @@ export async function deleteFlashCardAction(deckId: string, flashCardId: string)
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/decks/${deckId}/flashcards/${flashCardId}`, {
+        const response = await fetch(`${BACKEND_API_URL}/api/decks/${deckId}/flashcards/${flashCardId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${accessToken}` },
             agent: unsafeAgent
-        } as RequestInit & { agent?: any });
+        } as RequestInit & { agent?: https.Agent });
 
         if (response.ok || response.status === 204) {
             revalidatePath(`/decks/${deckId}`);
@@ -300,7 +300,7 @@ export async function updateFlashCardAction(
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/decks/${deckId}/flashcards/${flashCardId}`, {
+        const response = await fetch(`${BACKEND_API_URL}/api/decks/${deckId}/flashcards/${flashCardId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -308,7 +308,7 @@ export async function updateFlashCardAction(
             },
             body: JSON.stringify({ frontText, backText }),
             agent: unsafeAgent
-        } as RequestInit & { agent?: any });
+        } as RequestInit & { agent?: https.Agent });
 
         if (response.ok) {
             revalidatePath(`/decks/${deckId}`);

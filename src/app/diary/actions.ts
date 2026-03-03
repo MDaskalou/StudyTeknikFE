@@ -4,9 +4,9 @@ import { getAccessToken } from '@logto/next/server-actions';
 import { revalidatePath } from 'next/cache';
 import { logtoConfig } from '../logto';
 import https from 'https';
-
+import { BACKEND_API_URL } from '@/lib/constants';
 // --- Konfiguration ---
-const BACKEND_API_URL = 'https://localhost:44317';
+
 const API_IDENTIFIER = 'api://studyteknik';
 
 // Skapa en anpassad typ för fetch-options för att lösa TypeScript-fel

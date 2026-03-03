@@ -1,8 +1,9 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig, API_IDENTIFIER } from '@/app/logto';
+import { BACKEND_API_URL } from '@/lib/constants';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'https://localhost:44317';
+
 
 export async function POST(request: NextRequest) {
     try {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
             additionalContext,
         } = body;
 
-        const response = await fetch(`${BACKEND_URL}/api/study-sessions`, {
+        const response = await fetch(`${BACKEND_API_URL}/api/study-sessions`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,

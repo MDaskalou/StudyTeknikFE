@@ -1,9 +1,12 @@
 'use server';
 
+import https from 'https';
 import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig, API_IDENTIFIER } from '../logto';
+import { BACKEND_API_URL } from '@/lib/constants';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:44317';
+type FetchOptions = RequestInit & { agent?: https.Agent };
+const unsafeAgent = new https.Agent({ rejectUnauthorized: false });
 
 export type StudentProfileDto = {
     id: string;
@@ -14,7 +17,6 @@ export type StudentProfileDto = {
 };
 
 export async function getStudentProfileAction() {
-    // This runs in a Server Action (POST request), so it CAN modify cookies (e.g. refresh token)
     const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
 
     if (!accessToken) {
@@ -22,23 +24,24 @@ export async function getStudentProfileAction() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/student-profiles/GetAllStudentProfiles`, {
+        const options: FetchOptions = {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
-            agent: (global as any).unsafeAgent
-        } as RequestInit & { agent?: any });
+            agent: unsafeAgent
+        };
+
+        const response = await fetch(`${BACKEND_API_URL}/api/student-profiles/GetAllStudentProfiles`, options);
 
         if (!response.ok) {
             console.error('Failed to fetch profile:', response.status, response.statusText);
             return { success: false, message: `Error: ${response.status}`, data: null };
         }
 
-        const data = await response.json();
+        const data: StudentProfileDto | StudentProfileDto[] = await response.json();
 
-        // Handle array or single object
         let profile: StudentProfileDto | null = null;
         if (Array.isArray(data)) {
             profile = data.length > 0 ? data[0] : null;
@@ -61,15 +64,17 @@ export async function createStudentProfileAction(data: { planningHorizonWeeks: n
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/student-profiles/CreateStudentProfile`, {
+        const options: FetchOptions = {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data),
-            agent: (global as any).unsafeAgent
-        } as RequestInit & { agent?: any });
+            agent: unsafeAgent
+        };
+
+        const response = await fetch(`${BACKEND_API_URL}/api/student-profiles/CreateStudentProfile`, options);
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -77,16 +82,13 @@ export async function createStudentProfileAction(data: { planningHorizonWeeks: n
             return { success: false, message: `Error: ${response.status} - ${errorText}` };
         }
 
-        // The backend might return just the ID or the DTO. 
-        // To be safe and ensure we have the full object for the UI, we fetch the profile again.
         const profileResult = await getStudentProfileAction();
 
         if (profileResult.success && profileResult.data) {
             return { success: true, data: profileResult.data };
         }
 
-        // Fallback if fetch fails (shouldn't happen if create succeeded)
-        return { success: true, data: null as any };
+        return { success: true, data: null };
     } catch (error) {
         console.error('Error creating student profile:', error);
         return { success: false, message: 'Network error' };
@@ -109,14 +111,16 @@ export async function getStudentGeneralInfoAction() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/students/student/general`, {
+        const options: FetchOptions = {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             },
-            agent: (global as any).unsafeAgent
-        } as RequestInit & { agent?: any });
+            agent: unsafeAgent
+        };
+
+        const response = await fetch(`${BACKEND_API_URL}/api/students/student/general`, options);
 
         if (!response.ok) {
             console.error('Failed to fetch general info:', response.status, response.statusText);
