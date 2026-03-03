@@ -5,12 +5,11 @@ import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig } from '@/app/logto'; // Se till att sökvägen stämmer
 import https from 'https';
 import { BACKEND_API_URL } from '@/lib/constants';
+import { unsafeAgent, FetchOptions } from '@/lib/fetch-options';
 
 // 'Route' importerades men användes inte, så jag tog bort den.
 
 const API_IDENTIFIER = 'api://studyteknik';
-const unsafeAgent = new https.Agent({ rejectUnauthorized: false });
-type FetchOptions = RequestInit & { agent?: https.Agent };
 
 // Typ för vårt context-löfte (används av båda funktionerna)
 type RouteContext = {

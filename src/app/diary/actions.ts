@@ -5,19 +5,15 @@ import { revalidatePath } from 'next/cache';
 import { logtoConfig } from '../logto';
 import https from 'https';
 import { BACKEND_API_URL } from '@/lib/constants';
+import { unsafeAgent, FetchOptions } from '@/lib/fetch-options';
 // --- Konfiguration ---
 
 const API_IDENTIFIER = 'api://studyteknik';
 
 // Skapa en anpassad typ för fetch-options för att lösa TypeScript-fel
-type FetchOptions = RequestInit & {
-    agent?: https.Agent;
-};
 
-// Skapa en agent som ignorerar självsignerade certifikat (endast för lokal utveckling)
-const unsafeAgent = new https.Agent({
-    rejectUnauthorized: false,
-});
+
+
 
 // --- Datatyper ---
 // Definierar hur ett dagboksinlägg ser ut när det kommer från ditt API.

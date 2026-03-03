@@ -5,6 +5,7 @@ import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig } from '../logto'; // <-- KONTROLLERA ATT DENNA SÖKVÄG ÄR RÄTT
 import https from 'https';
 import { BACKEND_API_URL } from '@/lib/constants';
+import { unsafeAgent, FetchOptions } from '@/lib/fetch-options';
 
 
 // --- INTERFACES (Oförändrade) ---
@@ -35,8 +36,6 @@ type DeckUpdateData = {
 
 // --- KONSTANTER (Oförändrade) ---
 const API_IDENTIFIER = 'api://studyteknik';
-const unsafeAgent = new https.Agent({ rejectUnauthorized: false });
-type FetchOptions = RequestInit & { agent?: https.Agent };
 
 
 

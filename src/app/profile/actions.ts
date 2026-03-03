@@ -4,9 +4,8 @@ import https from 'https';
 import { getAccessToken } from '@logto/next/server-actions';
 import { logtoConfig, API_IDENTIFIER } from '../logto';
 import { BACKEND_API_URL } from '@/lib/constants';
+import { unsafeAgent, FetchOptions } from '@/lib/fetch-options';
 
-type FetchOptions = RequestInit & { agent?: https.Agent };
-const unsafeAgent = new https.Agent({ rejectUnauthorized: false });
 
 export type StudentProfileDto = {
     id: string;
