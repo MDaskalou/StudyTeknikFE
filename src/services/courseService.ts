@@ -2,7 +2,7 @@ import { API_BASE_URL, getHeaders } from '@/lib/api-config';
 import { CourseDto, CreateCourseDto, UpdateCourseDto } from '@/types/course';
 
 export const getCourses = async (token: string, studentProfileId: string): Promise<CourseDto[]> => {
-    const res = await fetch(`${API_BASE_URL}/student-profiles/${studentProfileId}/courses`, {
+    const res = await fetch(`${API_BASE_URL}/api/student-profiles/${studentProfileId}/courses`, {
         method: 'GET',
         headers: getHeaders(token),
         cache: 'no-store',
@@ -17,7 +17,7 @@ export const getCourses = async (token: string, studentProfileId: string): Promi
 };
 
 export const createCourse = async (token: string, studentProfileId: string, data: CreateCourseDto): Promise<CourseDto> => {
-    const url = `${API_BASE_URL}/student-profiles/${studentProfileId}/courses`;
+    const url = `${API_BASE_URL}/api/student-profiles/${studentProfileId}/courses`;
     console.log(`[createCourse] POST ${url}`, JSON.stringify(data, null, 2));
 
     const res = await fetch(url, {
@@ -35,7 +35,7 @@ export const createCourse = async (token: string, studentProfileId: string, data
 };
 
 export const updateCourse = async (token: string, studentProfileId: string, courseId: string, data: UpdateCourseDto): Promise<void> => {
-    const res = await fetch(`${API_BASE_URL}/student-profiles/${studentProfileId}/courses/${courseId}`, {
+    const res = await fetch(`${API_BASE_URL}/api/student-profiles/${studentProfileId}/courses/${courseId}`, {
         method: 'PUT',
         headers: getHeaders(token),
         body: JSON.stringify(data),
@@ -48,7 +48,7 @@ export const updateCourse = async (token: string, studentProfileId: string, cour
 };
 
 export const deleteCourse = async (token: string, studentProfileId: string, courseId: string): Promise<void> => {
-    const res = await fetch(`${API_BASE_URL}/student-profiles/${studentProfileId}/courses/${courseId}`, {
+    const res = await fetch(`${API_BASE_URL}/api/student-profiles/${studentProfileId}/courses/${courseId}`, {
         method: 'DELETE',
         headers: getHeaders(token),
     });
