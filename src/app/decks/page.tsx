@@ -32,7 +32,9 @@ export default async function DecksPage() {
         const allHeaders = await headers();
         const cookieHeader = allHeaders.get('cookie') || '';
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/decks/api`, {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://studyteknik.netlify.app';
+
+        const response = await fetch(`${baseUrl}/decks/api`, {
             cache: 'no-store',
             headers: {
                 'Cookie': cookieHeader
