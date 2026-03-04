@@ -261,6 +261,39 @@ export async function updateDeckAction(
         return { success: false, message: 'Ett oväntat nätverksfel inträffade vid uppdatering av kortleken.' };
     }
 }
+// Lägg till detta i din actions.ts
+export async function createFlashCardAction(
+    deckId: string,
+    frontText: string,
+    backText: string
+): Promise<ActionResult> {
+    const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
+    if (!accessToken) return { success: false, message: 'Not authenticated' };
+
+    try {
+        const response = await fetch(`${BACKEND_API_URL}/api/decks/${deckId}/flashcards`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ frontText, backText }),
+            agent: unsafeAgent
+        } as FetchOptions);
+
+        if (response.ok) {
+            // TRICKET: Detta rensar cachen för just denna kortlek så den uppdateras direkt
+            revalidatePath(`/decks/${deckId}`);
+            revalidatePath('/decks'); // Uppdaterar även kort-antalet på översikten
+            return { success: true, message: 'Kort skapat!' };
+        } else {
+            const errorText = await response.text();
+            return { success: false, message: `Fel vid skapande: ${errorText}` };
+        }
+    } catch (error) {
+        return { success: false, message: 'Nätverksfel vid skapande av kort' };
+    }
+}
 export async function deleteFlashCardAction(deckId: string, flashCardId: string): Promise<ActionResult> {
     const accessToken = await getAccessToken(logtoConfig, API_IDENTIFIER);
     if (!accessToken) {
