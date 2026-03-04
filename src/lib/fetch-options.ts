@@ -6,6 +6,10 @@ export const unsafeAgent = isDev
     ? new https.Agent({ rejectUnauthorized: false })
     : undefined;
 
-export interface FetchOptions extends RequestInit {
+export type FetchOptions = {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+    cache?: RequestCache;
     agent?: https.Agent;
-}
+};
