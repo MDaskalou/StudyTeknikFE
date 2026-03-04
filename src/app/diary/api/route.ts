@@ -12,7 +12,7 @@ interface DiaryEntry {
     id: string;
     studentId: string;
     entryDate: string;
-    textsnippet: string; // Se till att detta matchar din backend
+    text: string; // Se till att detta matchar din backend
     // Lägg till andra fält om de finns
 }
 
