@@ -38,12 +38,11 @@ export default async function DiaryPage() {
         const cookieStore = await cookies();
         const cookieHeader = cookieStore.toString();
 
-        // 2. Anropa din interna API-rutt (/diary/api)
-        // Vi använder 'fetch' här, INTE 'getAllEntries'
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/diary/api`, {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://studyteknik.netlify.app';
+
+        const response = await fetch(`${baseUrl}/diary/api`, {
             cache: 'no-store',
             headers: {
-                // 3. Skicka med cookies! Detta är nyckeln.
                 'Cookie': cookieHeader
             }
         });
