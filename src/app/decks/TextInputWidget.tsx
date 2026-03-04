@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Importera useRouter för att synka datan
 
 type AiCard = {
     frontText: string;
@@ -19,6 +20,7 @@ type Props = {
 };
 
 export default function TextInputWidget({ deckId, onCardsAdded }: Props) {
+    const router = useRouter(); // Initiera routern
     const [text, setText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -93,12 +95,16 @@ export default function TextInputWidget({ deckId, onCardsAdded }: Props) {
                 });
             }
 
+            // ✅ TRICKET: Tvinga Next.js att uppdatera sidans data från servern
+            // Detta gör att du ser alla 21 kort direkt utan manuell F5.
+            router.refresh();
+
             setSuggestedCards([]);
             setText('');
             setSuccessMessage(`✓ ${newlyCreatedCards.length} kort sparades och lades till i kortleken!`);
             setTimeout(() => setSuccessMessage(null), 5000);
 
-            // ✅ Skicka faktiska kort med ID — INGEN router.refresh()
+            // Skicka faktiska kort till föräldrakomponenten om det behövs extra logik där
             onCardsAdded?.(newlyCreatedCards);
 
         } catch (err) {
