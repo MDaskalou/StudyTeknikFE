@@ -4,6 +4,9 @@
 import { headers } from 'next/headers';
 import DeckView, { DeckDto, FlashCardDto } from './DeckView';
 
+// Centraliserad bas-URL för att undvika localhost-problem på Netlify
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://studyteknik.netlify.app';
+
 // Typen för de lösta propsen
 type DeckDetailsPageProps = {
     params: Promise<{ deckId: string }>
@@ -12,12 +15,16 @@ type DeckDetailsPageProps = {
 async function getFlashCards(deckId: string): Promise<FlashCardDto[]> {
     const allHeaders = await headers();
     const cookieHeader = allHeaders.get('cookie') || '';
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/decks/${deckId}/flashcards`, {
+
+    // Använder BASE_URL för att säkerställa att anropet når din interna rutt på Netlify
+    const response = await fetch(`${BASE_URL}/api/decks/${deckId}/flashcards`, {
         cache: 'no-store',
         headers: { 'Cookie': cookieHeader }
     });
+
     if (!response.ok) {
-        return []; // Returnera tom lista vid fel för att inte krascha hela sidan
+        console.error(`Fel vid hämtning av flashcards för ${deckId}: ${response.status}`);
+        return [];
     }
     const data = await response.json();
     return Array.isArray(data) ? data : [];
@@ -27,9 +34,8 @@ async function getDeck(deckId: string): Promise<DeckDto | null> {
     const allHeaders = await headers();
     const cookieHeader = allHeaders.get('cookie') || '';
 
-    // Vi antar att denna endpoint finns baserat på REST-praxis
-    // Om den inte finns måste vi implementera en Server Action eller liknande.
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/decks/${deckId}`, {
+    // Använder BASE_URL istället för localhost
+    const response = await fetch(`${BASE_URL}/api/decks/${deckId}`, {
         cache: 'no-store',
         headers: { 'Cookie': cookieHeader }
     });
@@ -53,7 +59,7 @@ export default async function DeckDetailsPage(
         getFlashCards(deckId)
     ]);
 
-    // Fallback om kortleken inte hittas (t.ex. 404)
+    // Fallback om kortleken inte hittas
     if (!deck) {
         return (
             <div className="max-w-4xl mx-auto p-8">
